@@ -112,13 +112,16 @@ async function generatePdf(formData: {
     doc.text(title, margin + 2, currentY + 6);
     currentY += 8;
 
-    const body = products.map((p, index) => [
-      index + 1,
-      `${p.name} / ${p.size}`,
-      p.quantity,
-      formatCurrency(p.unitPrice),
-      formatCurrency(p.totalPrice),
-    ]);
+    const body = products.map((p, index) => {
+      const productName = p.gender ? `${p.name} (${p.gender})` : p.name;
+      return [
+        index + 1,
+        `${productName} / ${p.size}`,
+        p.quantity,
+        formatCurrency(p.unitPrice),
+        formatCurrency(p.totalPrice),
+      ];
+    });
 
     autoTable(doc, {
       startY: currentY,
@@ -219,18 +222,18 @@ export function PdfGeneratorForm() {
         link.click();
         document.body.removeChild(link);
         
-        toast({
-          title: 'PDF Gerado com Sucesso!',
-          description: 'O download do seu pré-orçamento deve começar em breve.',
-          variant: 'default',
-        });
+        // toast({
+        //   title: 'PDF Gerado com Sucesso!',
+        //   description: 'O download do seu pré-orçamento deve começar em breve.',
+        //   variant: 'default',
+        // });
       } catch (e: any) {
         console.error('PDF Generation Failed:', e);
-        toast({
-          title: 'Erro ao Gerar PDF',
-          description: e.message || 'Não foi possível interpretar o texto. Verifique o formato.',
-          variant: 'destructive',
-        });
+        // toast({
+        //   title: 'Erro ao Gerar PDF',
+        //   description: e.message || 'Não foi possível interpretar o texto. Verifique o formato.',
+        //   variant: 'destructive',
+        // });
       }
     });
   };
