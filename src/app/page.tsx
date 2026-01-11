@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
+import { Toaster } from '@/components/ui/toaster';
 
 const PdfGeneratorForm = dynamic(
   () => import('@/components/pdf-generator-form').then(mod => mod.PdfGeneratorForm),
@@ -17,6 +18,7 @@ export default function Home() {
         </div>
         <PdfGeneratorForm />
       </div>
+      <Toaster />
     </main>
   );
 }
