@@ -34,13 +34,13 @@ const exampleText = `Olá! Gostaria de fazer um pedido.
 Subtotal: R$ 187,20
 
 --- DADOS PARA ENTREGA ---
-Nome: weslley monteiro
-CPF: 08935006238
-Telefone: 91981007061
-Endereço: Rua da Praia Unida, 909
-Bairro: Cotijuba
-Cidade/Estado: Belém/PA
-CEP: 66846360`;
+Nome: João da Silva
+CPF: 123.456.789-00
+Telefone: (11) 98765-4321
+Endereço: Av. Exemplo, 123
+Bairro: Bairro Fictício
+Cidade/Estado: São Paulo/SP
+CEP: 12345-678`;
 
 export function PdfGeneratorForm() {
   const { toast } = useToast();
