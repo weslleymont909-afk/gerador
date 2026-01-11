@@ -4,7 +4,7 @@ function parseProducts(text: string): ProductItem[] {
   const productLines = text.match(/- \d+x (.*)/g) || [];
   
   return productLines.map(line => {
-    const match = line.match(/- (?<quantity>\d+)x (?<desc>.*?) - R\$ (?<price>[\d,.]+)/);
+    const match = line.match(/- (?<quantity>\d+)x (?<desc>.*?)\s+-\s+R\$\s+(?<price>[\d,.]+)/);
     if (!match || !match.groups) {
       console.error(`Could not parse product line: ${line}`);
       throw new Error(`Could not parse product line: ${line}`);
