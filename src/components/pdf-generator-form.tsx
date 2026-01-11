@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +15,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { parseOrderText } from '@/lib/parser';
 import { generatePdf } from '@/lib/pdf-generator';
-import { DatePicker } from './ui/date-picker';
+
+const DatePicker = dynamic(() => import('./ui/date-picker').then(mod => mod.DatePicker), {
+  ssr: false,
+  loading: () => <div className="h-10 w-full rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">Carregando data...</div>
+});
 
 const formSchema = z.object({
   orderText: z.string().min(50, { message: 'O texto do pedido parece muito curto.' }),
@@ -43,22 +48,15 @@ CEP: 54321-876`;
 export function PdfGeneratorForm() {
   const { toast } = useToast();
   const [isGenerating, startGenerationTransition] = useTransition();
-  const [isClient, setIsClient] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       orderText: '',
       frete: 0,
-      orderDate: undefined,
+      orderDate: new Date(),
     },
   });
-
-  useEffect(() => {
-    // This effect runs only on the client, ensuring client-side only rendering for date picker
-    setIsClient(true);
-    form.setValue('orderDate', new Date());
-  }, [form]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     startGenerationTransition(() => {
@@ -112,21 +110,19 @@ export function PdfGeneratorForm() {
             />
 
             <div className="grid md:grid-cols-2 gap-4">
-              {isClient && (
-                <FormField
-                  control={form.control}
-                  name="orderDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data do Pedido</FormLabel>
-                      <FormControl>
-                         <DatePicker date={field.value} setDate={field.onChange} className="w-full" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              <FormField
+                control={form.control}
+                name="orderDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data do Pedido</FormLabel>
+                    <FormControl>
+                       <DatePicker date={field.value} setDate={field.onChange} className="w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="frete"
