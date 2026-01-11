@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from 'react';
+import { useTransition, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -43,6 +43,11 @@ CEP: 54321-876`;
 export function PdfGeneratorForm() {
   const { toast } = useToast();
   const [isGenerating, startGenerationTransition] = useTransition();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -77,6 +82,10 @@ export function PdfGeneratorForm() {
       }
     });
   };
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <Card className="w-full">
