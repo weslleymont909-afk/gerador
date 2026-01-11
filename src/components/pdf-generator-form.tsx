@@ -4,8 +4,7 @@ import { useState, useRef, useTransition, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, FileDown, Loader2, Printer, WandSparkles } from 'lucide-react';
-import { format } from "date-fns";
+import { AlertTriangle, FileDown, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,6 +49,7 @@ export function PdfGeneratorForm() {
   const [aiErrors, setAiErrors] = useState<string[]>([]);
   const [isCheckingErrors, startErrorCheckTransition] = useTransition();
   const [isGenerating, startGenerationTransition] = useTransition();
+  const [isClient, setIsClient] = useState(false);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -64,6 +64,7 @@ export function PdfGeneratorForm() {
   useEffect(() => {
     // Set default date on the client to avoid hydration mismatch
     form.setValue('orderDate', new Date());
+    setIsClient(true);
   }, [form]);
 
   const handleTextChange = (text: string) => {
@@ -168,7 +169,7 @@ export function PdfGeneratorForm() {
                   <FormItem>
                     <FormLabel>Data do Pedido</FormLabel>
                     <FormControl>
-                       <DatePicker date={field.value} setDate={field.onChange} className="w-full" />
+                       {isClient ? <DatePicker date={field.value} setDate={field.onChange} className="w-full" /> : <div></div>}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
