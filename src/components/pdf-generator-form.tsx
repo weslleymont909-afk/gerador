@@ -15,12 +15,10 @@ import { useToast } from '@/hooks/use-toast';
 import { parseOrderText } from '@/lib/parser';
 import { generatePdf } from '@/lib/pdf-generator';
 import { DatePicker } from './ui/date-picker';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const formSchema = z.object({
   orderText: z.string().min(50, { message: 'O texto do pedido parece muito curto.' }),
   orderDate: z.date({ required_error: 'A data do pedido é obrigatória.' }),
-  paymentMethod: z.string().min(1, { message: 'Selecione uma forma de pagamento.' }),
   frete: z.coerce.number().min(0, { message: 'O frete não pode ser negativo.' }).default(0),
 });
 
@@ -50,9 +48,8 @@ export function PdfGeneratorForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       orderText: '',
-      paymentMethod: 'Pix / Cartão / Dinheiro',
       frete: 0,
-      orderDate: undefined, // Initialize as undefined
+      orderDate: undefined,
     },
   });
 
@@ -67,7 +64,7 @@ export function PdfGeneratorForm() {
         const parsedData = parseOrderText(values.orderText);
         generatePdf(parsedData, {
           orderDate: values.orderDate,
-          paymentMethod: values.paymentMethod,
+          paymentMethod: 'Pix',
           frete: values.frete,
         });
         toast({
@@ -112,7 +109,7 @@ export function PdfGeneratorForm() {
               )}
             />
 
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="orderDate"
@@ -122,30 +119,6 @@ export function PdfGeneratorForm() {
                     <FormControl>
                        <DatePicker date={field.value} setDate={field.onChange} className="w-full" />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="paymentMethod"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Forma de Pagamento</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Pix / Cartão / Dinheiro">Pix / Cartão / Dinheiro</SelectItem>
-                        <SelectItem value="Pix">Pix</SelectItem>
-                        <SelectItem value="Cartão de Crédito">Cartão de Crédito</SelectItem>
-                        <SelectItem value="Cartão de Débito">Cartão de Débito</SelectItem>
-                        <SelectItem value="Dinheiro">Dinheiro</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
