@@ -1,6 +1,6 @@
-import {createNextApiHandler} from '@genkit-ai/next';
+import {defineNextApiHandler} from '@genkit-ai/next';
+import {ai} from '@/ai/genkit';
 
-// O fluxo de IA referenciado abaixo não existe e estava causando erro no build.
-// import '@/ai/flows/detect-errors-in-text';
-
-export const {GET, POST} = createNextApiHandler();
+export const {GET, POST} = defineNextApiHandler({
+  ai,
+});
