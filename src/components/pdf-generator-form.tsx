@@ -43,6 +43,7 @@ CEP: 54321-876`;
 export function PdfGeneratorForm() {
   const { toast } = useToast();
   const [isGenerating, startGenerationTransition] = useTransition();
+  const [isClient, setIsClient] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,7 +55,8 @@ export function PdfGeneratorForm() {
   });
 
   useEffect(() => {
-    // Set default date on the client to avoid hydration mismatch
+    // This effect runs only on the client, ensuring client-side only rendering for date picker
+    setIsClient(true);
     form.setValue('orderDate', new Date());
   }, [form]);
 
@@ -110,19 +112,21 @@ export function PdfGeneratorForm() {
             />
 
             <div className="grid md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="orderDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data do Pedido</FormLabel>
-                    <FormControl>
-                       <DatePicker date={field.value} setDate={field.onChange} className="w-full" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {isClient && (
+                <FormField
+                  control={form.control}
+                  name="orderDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data do Pedido</FormLabel>
+                      <FormControl>
+                         <DatePicker date={field.value} setDate={field.onChange} className="w-full" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <FormField
                 control={form.control}
                 name="frete"
