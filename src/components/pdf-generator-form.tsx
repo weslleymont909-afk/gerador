@@ -52,14 +52,12 @@ export function PdfGeneratorForm() {
       orderText: '',
       paymentMethod: 'Pix / Cartão / Dinheiro',
       frete: 0,
-      // Initialize with a value, will be updated on client
-      orderDate: new Date(), 
+      orderDate: undefined, // Initialize as undefined
     },
   });
 
   useEffect(() => {
     // Set default date on the client to avoid hydration mismatch
-    // This runs only on the client after the component mounts
     form.setValue('orderDate', new Date());
   }, [form]);
 
