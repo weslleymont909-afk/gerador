@@ -53,7 +53,7 @@ export function generatePdf(
 
   let currentY = customerInfoY + infoHeight + 10;
   
-  const drawTableSection = (title: string, products: ProductItem[], totalRows: number) => {
+  const drawTableSection = (title: string, products: ProductItem[]) => {
     // Section Header
     doc.setFillColor(173, 216, 230); // lightblue
     doc.rect(margin, currentY, pageWidth - margin * 2, 8, 'F');
@@ -71,11 +71,6 @@ export function generatePdf(
       formatCurrency(p.unitPrice),
       formatCurrency(p.totalPrice),
     ]);
-  
-    // Pad with empty rows
-    while (body.length < totalRows) {
-      body.push(['', '', '0', formatCurrency(0), formatCurrency(0)]);
-    }
   
     autoTable(doc, {
       startY: currentY,
@@ -110,12 +105,12 @@ export function generatePdf(
   const dogProducts = data.products.filter(p => p.type === 'CÃO');
 
   if (catProducts.length > 0) {
-    drawTableSection('GATO', catProducts, 4);
+    drawTableSection('GATO', catProducts);
     currentY += 5;
   }
 
   if (dogProducts.length > 0) {
-    drawTableSection('CÃO', dogProducts, 9);
+    drawTableSection('CÃO', dogProducts);
     currentY += 5;
   }
   
