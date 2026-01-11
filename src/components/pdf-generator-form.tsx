@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, FileDown, Loader2 } from 'lucide-react';
+import { FileDown, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +12,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { detectErrorsInText } from '@/ai/flows/detect-errors-in-text';
 import { parseOrderText } from '@/lib/parser';
 import { generatePdf } from '@/lib/pdf-generator';
 import { DatePicker } from './ui/date-picker';
@@ -46,11 +44,8 @@ CEP: 66846360`;
 
 export function PdfGeneratorForm() {
   const { toast } = useToast();
-  const [aiErrors, setAiErrors] = useState<string[]>([]);
-  const [isCheckingErrors, startErrorCheckTransition] = useTransition();
   const [isGenerating, startGenerationTransition] = useTransition();
   const [isClient, setIsClient] = useState(false);
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,27 +61,6 @@ export function PdfGeneratorForm() {
     form.setValue('orderDate', new Date());
     setIsClient(true);
   }, [form]);
-
-  const handleTextChange = (text: string) => {
-    form.setValue('orderText', text);
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
-    debounceTimeout.current = setTimeout(() => {
-      if (text.trim().length > 50) {
-        startErrorCheckTransition(async () => {
-          try {
-            const result = await detectErrorsInText({ text });
-            setAiErrors(result.errors);
-          } catch (e) {
-            console.error('AI Error Check Failed:', e);
-          }
-        });
-      } else {
-        setAiErrors([]);
-      }
-    }, 1000);
-  };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     startGenerationTransition(() => {
@@ -132,34 +106,12 @@ export function PdfGeneratorForm() {
                       placeholder={exampleText}
                       className="min-h-[250px] font-mono text-sm"
                       {...field}
-                      onChange={(e) => handleTextChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {isCheckingErrors && (
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analisando o texto com IA...
-              </div>
-            )}
-            
-            {aiErrors.length > 0 && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Possíveis Erros Detectados pela IA</AlertTitle>
-                <AlertDescription>
-                  <ul className="list-disc pl-5 space-y-1 mt-2">
-                    {aiErrors.map((error, index) => (
-                      <li key={index}>{error}</li>
-                    ))}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            )}
 
             <div className="grid md:grid-cols-3 gap-4">
               <FormField
