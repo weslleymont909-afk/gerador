@@ -4,11 +4,6 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { type ParsedData, type ProductItem } from './types';
 
-// Extend jsPDF with autoTable
-interface jsPDFWithAutoTable extends jsPDF {
-  autoTable: (options: any) => jsPDFWithAutoTable;
-}
-
 const formatCurrency = (value: number) => {
   return `R$ ${value.toFixed(2).replace('.', ',')}`;
 };
@@ -17,7 +12,7 @@ export function generatePdf(
   data: ParsedData, 
   options: { orderDate: Date; paymentMethod: string; notes: string }
 ) {
-  const doc = new jsPDF() as jsPDFWithAutoTable;
+  const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.getHeight();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 15;
@@ -83,7 +78,7 @@ export function generatePdf(
       body.push(['', '', '0', formatCurrency(0), formatCurrency(0), '']);
     }
   
-    doc.autoTable({
+    autoTable(doc, {
       startY: currentY,
       head: [['ITEM', 'PRODUTOS / NÚMEROS', 'QUANTIDADE', 'R$ un.', 'Total', 'OK']],
       body: body,
