@@ -33,11 +33,11 @@ const detectErrorsInTextPrompt = ai.definePrompt({
   name: 'detectErrorsInTextPrompt',
   input: {schema: DetectErrorsInTextInputSchema},
   output: {schema: DetectErrorsInTextOutputSchema},
-  prompt: `You are an AI assistant specializing in detecting errors and inconsistencies in text extracted from user input, specifically for pre-budget generation.
+  prompt: `Você é um assistente de IA especializado em detectar erros e inconsistências em textos inseridos por usuários, especificamente para a geração de pré-orçamentos.
 
-  Analyze the following text and identify any potential errors, missing information, or formatting inconsistencies that could cause problems during PDF generation. Be as specific as possible, list all possible errors you can find and return them as a list. If the text is well-formatted and contains all necessary information, return an empty list.
+  Analise o texto a seguir e identifique possíveis erros, informações ausentes ou inconsistências de formatação que possam causar problemas durante a geração do PDF. Seja o mais específico possível, liste todos os erros que encontrar e retorne-os como uma lista em português. Se o texto estiver bem formatado e contiver todas as informações necessárias, retorne uma lista vazia.
 
-  Text: {{{text}}}
+  Texto: {{{text}}}
   `,config: {
     safetySettings: [
       {
