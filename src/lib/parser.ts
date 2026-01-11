@@ -70,19 +70,23 @@ function parseSubtotal(text: string): number {
 
 
 export function parseOrderText(text: string): ParsedData {
-  const productsSectionMatch = text.match(/--- RESUMO DO PEDIDO ---\s*([\s\S]*?)\s*--- DADOS PARA ENTREGA ---/);
+  const productsSectionMatch = text.match(/--- RESUMO DO PEDIDO ---\s*([\s\S]*?)(\s*--- DADOS PARA ENTREGA ---|$)/);
   const deliverySectionMatch = text.match(/--- DADOS PARA ENTREGA ---\s*([\s\S]*)/);
   
-  if (!productsSectionMatch || !deliverySectionMatch) {
-    throw new Error("Formato do texto inválido. Verifique se as seções 'RESUMO DO PEDIDO' e 'DADOS PARA ENTREGA' existem.");
+  if (!productsSectionMatch) {
+    throw new Error("Formato do texto inválido. Verifique se a seção 'RESUMO DO PEDIDO' existe.");
   }
   
-  const productsText = productsSectionMatch[1];
-  const deliveryText = deliverySectionMatch[1];
+  const productsText = productsSectionMatch[1] || '';
+  const deliveryText = deliverySectionMatch ? deliverySectionMatch[1] : '';
 
   const products = parseProducts(productsText);
   const customer = parseCustomerInfo(deliveryText);
   const subtotal = parseSubtotal(productsText);
+
+  if (products.length === 0) {
+    console.warn("Nenhum produto foi encontrado no texto do pedido. Verifique o formato.");
+  }
 
   return { products, customer, subtotal };
 }
