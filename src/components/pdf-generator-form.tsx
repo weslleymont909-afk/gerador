@@ -34,18 +34,17 @@ const exampleText = `Olá! Gostaria de fazer um pedido.
 Subtotal: R$ 187,20
 
 --- DADOS PARA ENTREGA ---
-Nome: João da Silva
-CPF: 123.456.789-00
-Telefone: (11) 98765-4321
-Endereço: Av. Exemplo, 123
-Bairro: Bairro Fictício
-Cidade/Estado: São Paulo/SP
-CEP: 12345-678`;
+Nome: Maria Souza
+CPF: 999.888.777-66
+Telefone: (21) 95555-4444
+Endereço: Rua da Imaginação, 789
+Bairro: Centro
+Cidade/Estado: Rio de Janeiro/RJ
+CEP: 54321-876`;
 
 export function PdfGeneratorForm() {
   const { toast } = useToast();
   const [isGenerating, startGenerationTransition] = useTransition();
-  const [isClient, setIsClient] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,13 +52,15 @@ export function PdfGeneratorForm() {
       orderText: '',
       paymentMethod: 'Pix / Cartão / Dinheiro',
       frete: 0,
+      // Initialize with a value, will be updated on client
+      orderDate: new Date(), 
     },
   });
 
   useEffect(() => {
     // Set default date on the client to avoid hydration mismatch
+    // This runs only on the client after the component mounts
     form.setValue('orderDate', new Date());
-    setIsClient(true);
   }, [form]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
@@ -121,7 +122,7 @@ export function PdfGeneratorForm() {
                   <FormItem>
                     <FormLabel>Data do Pedido</FormLabel>
                     <FormControl>
-                       {isClient ? <DatePicker date={field.value} setDate={field.onChange} className="w-full" /> : <div className="h-10 w-full rounded-md border border-input bg-background px-3 py-2"></div>}
+                       <DatePicker date={field.value} setDate={field.onChange} className="w-full" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
