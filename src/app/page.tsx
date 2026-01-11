@@ -1,4 +1,11 @@
-import { PdfGeneratorForm } from '@/components/pdf-generator-form';
+"use client";
+
+import dynamic from 'next/dynamic';
+
+const PdfGeneratorForm = dynamic(
+  () => import('@/components/pdf-generator-form').then(mod => mod.PdfGeneratorForm),
+  { ssr: false }
+);
 
 export default function Home() {
   return (
