@@ -10,7 +10,7 @@ const formatCurrency = (value: number) => {
 
 export function generatePdf(
   data: ParsedData, 
-  options: { orderDate: Date; paymentMethod: string; notes: string }
+  options: { orderDate: Date; paymentMethod: string; frete: number }
 ) {
   const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -40,7 +40,7 @@ export function generatePdf(
   doc.text('Endereço:', col1X, customerInfoY + 21);
   doc.text('Data do pedido:', col2X, customerInfoY + 7);
   doc.text('Forma de pgto:', col2X, customerInfoY + 14);
-  doc.text('Anotações:', col2X, customerInfoY + 21);
+  doc.text('Frete:', col2X, customerInfoY + 21);
 
   doc.setFont('helvetica', 'normal');
   doc.text(data.customer.name, col1X + 18, customerInfoY + 7);
@@ -49,11 +49,12 @@ export function generatePdf(
 
   doc.text(format(options.orderDate, 'dd/MM/yyyy', { locale: ptBR }), col2X + 35, customerInfoY + 7);
   doc.text(options.paymentMethod, col2X + 35, customerInfoY + 14);
-  doc.text(options.notes, col2X + 35, customerInfoY + 21);
+  doc.text(formatCurrency(options.frete), col2X + 35, customerInfoY + 21);
 
   let currentY = customerInfoY + infoHeight + 10;
   
   const drawTableSection = (title: string, products: ProductItem[]) => {
+    if (products.length === 0) return;
     // Section Header
     doc.setFillColor(173, 216, 230); // lightblue
     doc.rect(margin, currentY, pageWidth - margin * 2, 8, 'F');
@@ -103,6 +104,8 @@ export function generatePdf(
 
   const catProducts = data.products.filter(p => p.type === 'GATO');
   const dogProducts = data.products.filter(p => p.type === 'CÃO');
+  const otherProducts = data.products.filter(p => p.type === 'UNKNOWN');
+
 
   if (catProducts.length > 0) {
     drawTableSection('GATO', catProducts);
@@ -114,8 +117,14 @@ export function generatePdf(
     currentY += 5;
   }
   
+  if (otherProducts.length > 0) {
+    drawTableSection('OUTROS', otherProducts);
+    currentY += 5;
+  }
+  
   // Recalculate total from products
-  const calculatedTotal = data.products.reduce((sum, p) => sum + p.totalPrice, 0);
+  const calculatedSubtotal = data.products.reduce((sum, p) => sum + p.totalPrice, 0);
+  const finalTotal = calculatedSubtotal + options.frete;
 
   // --- FOOTER ---
   let footerY = Math.max(currentY + 10, pageHeight - 50);
@@ -132,11 +141,7 @@ export function generatePdf(
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text('Total geral:', margin, totalY);
-  doc.text(formatCurrency(calculatedTotal), margin + 35, totalY);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text('Observação: "Frete separado"', margin, totalY + 10);
+  doc.text(formatCurrency(finalTotal), margin + 35, totalY);
 
   const diffX = pageWidth - margin - 80;
   doc.rect(diffX, footerY + 3, 75, 20); // Increased height of the box
@@ -144,7 +149,7 @@ export function generatePdf(
   doc.setFontSize(8);
   doc.text('Diferença em cima do valor original:', diffX + 2, footerY + 8);
   doc.setFont('helvetica', 'normal');
-  const difference = calculatedTotal - data.subtotal;
+  const difference = finalTotal - data.subtotal;
   doc.text(formatCurrency(difference), diffX + 2, footerY + 14, {maxWidth: 70});
 
 

@@ -23,7 +23,7 @@ const formSchema = z.object({
   orderText: z.string().min(50, { message: 'O texto do pedido parece muito curto.' }),
   orderDate: z.date({ required_error: 'A data do pedido é obrigatória.' }),
   paymentMethod: z.string().min(1, { message: 'Selecione uma forma de pagamento.' }),
-  notes: z.string(),
+  frete: z.coerce.number().min(0, { message: 'O frete não pode ser negativo.' }).default(0),
 });
 
 const exampleText = `Olá! Gostaria de fazer um pedido.
@@ -57,7 +57,7 @@ export function PdfGeneratorForm() {
     defaultValues: {
       orderText: '',
       paymentMethod: 'Pix / Cartão / Dinheiro',
-      notes: 'Frete separado',
+      frete: 0,
     },
   });
 
@@ -95,7 +95,7 @@ export function PdfGeneratorForm() {
         generatePdf(parsedData, {
           orderDate: values.orderDate,
           paymentMethod: values.paymentMethod,
-          notes: values.notes,
+          frete: values.frete,
         });
         toast({
           title: 'PDF Gerado com Sucesso!',
@@ -169,7 +169,7 @@ export function PdfGeneratorForm() {
                   <FormItem>
                     <FormLabel>Data do Pedido</FormLabel>
                     <FormControl>
-                       {isClient ? <DatePicker date={field.value} setDate={field.onChange} className="w-full" /> : <div></div>}
+                       {isClient ? <DatePicker date={field.value} setDate={field.onChange} className="w-full" /> : <div className="h-10 w-full rounded-md border border-input bg-background px-3 py-2"></div>}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -201,12 +201,12 @@ export function PdfGeneratorForm() {
               />
               <FormField
                 control={form.control}
-                name="notes"
+                name="frete"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Observações</FormLabel>
+                    <FormLabel>Frete</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="number" step="0.01" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
