@@ -127,27 +127,39 @@ export function generatePdf(
     currentY += 5;
   }
   
+  // Recalculate total from products
+  const calculatedTotal = data.products.reduce((sum, p) => sum + p.totalPrice, 0);
+
   // --- FOOTER ---
-  const footerY = Math.max(currentY + 10, pageHeight - 50);
+  let footerY = Math.max(currentY + 10, pageHeight - 50);
+  if (footerY > pageHeight - 50) {
+    doc.addPage();
+    footerY = margin;
+  }
+  
   doc.setLineWidth(0.5);
   doc.line(margin, footerY, pageWidth - margin, footerY);
 
+  const totalY = footerY + 10;
+  
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.text('Total geral:', margin, footerY + 10);
-  doc.text(formatCurrency(data.subtotal), margin + 30, footerY + 10);
+  doc.setFontSize(12);
+  doc.text('Total geral:', margin, totalY);
+  doc.text(formatCurrency(calculatedTotal), margin + 35, totalY);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text('Observação: "Frete separado"', margin, footerY + 20);
+  doc.text('Observação: "Frete separado"', margin, totalY + 10);
 
   const diffX = pageWidth - margin - 80;
-  doc.rect(diffX, footerY + 3, 75, 12);
+  doc.rect(diffX, footerY + 3, 75, 20); // Increased height of the box
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.text('Diferença em cima do valor original:', diffX + 2, footerY + 8);
   doc.setFont('helvetica', 'normal');
-  doc.text(formatCurrency(0), diffX + 2, footerY + 18, {maxWidth: 70});
+  const difference = calculatedTotal - data.subtotal;
+  doc.text(formatCurrency(difference), diffX + 2, footerY + 14, {maxWidth: 70});
+
 
   doc.save('pre-orcamento.pdf');
 }
