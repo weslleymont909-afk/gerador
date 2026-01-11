@@ -12,9 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { parseOrderText } from '@/lib/parser';
-import { generatePdf } from '@/lib/pdf-generator';
 import { DatePicker } from '@/components/ui/date-picker';
+import { generatePdfAction } from '@/app/actions';
 
 const formSchema = z.object({
   orderText: z.string().min(50, { message: 'O texto do pedido parece muito curto.' }),
@@ -54,25 +53,29 @@ export function PdfGeneratorForm() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    startGenerationTransition(() => {
-      try {
-        const parsedData = parseOrderText(values.orderText);
-        generatePdf(parsedData, {
-          orderDate: values.orderDate,
-          paymentMethod: 'Pix',
-          frete: values.frete,
+    startGenerationTransition(async () => {
+      const result = await generatePdfAction(values);
+      
+      if ('error' in result) {
+        console.error('PDF Generation Failed:', result.error);
+        toast({
+          title: 'Erro ao Gerar PDF',
+          description: result.error || 'Não foi possível interpretar o texto. Verifique o formato.',
+          variant: 'destructive',
         });
+      } else {
+        // Create a link to download the PDF
+        const link = document.createElement('a');
+        link.href = result.pdfBase64;
+        link.download = 'pre-orcamento.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
         toast({
           title: 'PDF Gerado com Sucesso!',
           description: 'O download do seu pré-orçamento deve começar em breve.',
           variant: 'default',
-        });
-      } catch (error: any) {
-        console.error('PDF Generation Failed:', error);
-        toast({
-          title: 'Erro ao Gerar PDF',
-          description: error.message || 'Não foi possível interpretar o texto. Verifique o formato.',
-          variant: 'destructive',
         });
       }
     });
