@@ -222,18 +222,18 @@ export function PdfGeneratorForm() {
         link.click();
         document.body.removeChild(link);
         
-        // toast({
-        //   title: 'PDF Gerado com Sucesso!',
-        //   description: 'O download do seu pré-orçamento deve começar em breve.',
-        //   variant: 'default',
-        // });
+        toast({
+          title: 'PDF Gerado com Sucesso!',
+          description: 'O download do seu pré-orçamento deve começar em breve.',
+          variant: 'default',
+        });
       } catch (e: any) {
         console.error('PDF Generation Failed:', e);
-        // toast({
-        //   title: 'Erro ao Gerar PDF',
-        //   description: e.message || 'Não foi possível interpretar o texto. Verifique o formato.',
-        //   variant: 'destructive',
-        // });
+        toast({
+          title: 'Erro ao Gerar PDF',
+          description: e.message || 'Não foi possível interpretar o texto. Verifique o formato.',
+          variant: 'destructive',
+        });
       }
     });
   };
