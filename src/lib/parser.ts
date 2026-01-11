@@ -1,10 +1,10 @@
 import { type ParsedData, type ProductItem, type CustomerInfo } from './types';
 
 function parseProducts(text: string): ProductItem[] {
-  const productLines = text.match(/- \d+x (.*?)- R\$ ([\d,.]+)/g) || [];
+  const productLines = text.match(/- \d+x (.*?) R\$ ([\d,.]+)/g) || [];
   
   return productLines.map(line => {
-    const match = line.match(/- (?<quantity>\d+)x (?<desc>.*?) - R\$ (?<price>[\d,.]+)/);
+    const match = line.match(/- (?<quantity>\d+)x (?<desc>.*?) R\$ (?<price>[\d,.]+)/);
     if (!match || !match.groups) {
       // This should not happen if the initial regex worked, but it's a safe guard.
       throw new Error(`Could not parse product line: ${line}`);
