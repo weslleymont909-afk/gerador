@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from 'react';
-import dynamic from 'next/dynamic';
+import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,11 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { parseOrderText } from '@/lib/parser';
 import { generatePdf } from '@/lib/pdf-generator';
-
-const DatePicker = dynamic(() => import('./ui/date-picker').then(mod => mod.DatePicker), {
-  ssr: false,
-  loading: () => <div className="h-10 w-full rounded-md border bg-background px-3 py-2 text-sm text-muted-foreground">Carregando data...</div>
-});
+import { DatePicker } from '@/components/ui/date-picker';
 
 const formSchema = z.object({
   orderText: z.string().min(50, { message: 'O texto do pedido parece muito curto.' }),
@@ -37,7 +32,7 @@ const exampleText = `Olá! Gostaria de fazer um pedido.
 Subtotal: R$ 187,20
 
 --- DADOS PARA ENTREGA ---
-Nome: Maria Souza
+Nome: Maria Exemplo
 CPF: 999.888.777-66
 Telefone: (21) 95555-4444
 Endereço: Rua da Imaginação, 789

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
+import { Toaster } from "@/components/ui/toaster"
 
 const PdfGeneratorForm = dynamic(
   () => import('@/components/pdf-generator-form').then(mod => mod.PdfGeneratorForm),
@@ -16,6 +17,7 @@ export default function Home() {
           <p className="text-muted-foreground mt-2">Cole o texto do seu pedido para gerar um PDF profissional instantaneamente.</p>
         </div>
         <PdfGeneratorForm />
+        <Toaster />
       </div>
     </main>
   );
