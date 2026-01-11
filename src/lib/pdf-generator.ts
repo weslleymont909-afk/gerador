@@ -70,17 +70,16 @@ export function generatePdf(
       p.quantity,
       formatCurrency(p.unitPrice),
       formatCurrency(p.totalPrice),
-      ''
     ]);
   
     // Pad with empty rows
     while (body.length < totalRows) {
-      body.push(['', '', '0', formatCurrency(0), formatCurrency(0), '']);
+      body.push(['', '', '0', formatCurrency(0), formatCurrency(0)]);
     }
   
     autoTable(doc, {
       startY: currentY,
-      head: [['ITEM', 'PRODUTOS / NÚMEROS', 'QUANTIDADE', 'R$ un.', 'Total', 'OK']],
+      head: [['ITEM', 'PRODUTOS / NÚMEROS', 'QUANTIDADE', 'R$ un.', 'Total']],
       body: body,
       theme: 'grid',
       margin: { left: margin, right: margin },
@@ -101,13 +100,6 @@ export function generatePdf(
         2: { halign: 'center', cellWidth: 30 }, // QTD
         3: { halign: 'right', cellWidth: 35 }, // R$ un.
         4: { halign: 'right', cellWidth: 35 }, // Total
-        5: { halign: 'center', cellWidth: 15 }, // OK
-      },
-      didDrawCell: (data) => {
-        if (data.column.dataKey === 5 && data.cell.section === 'body') {
-          doc.setDrawColor(0);
-          doc.rect(data.cell.x + 4, data.cell.y + 4, 7, 7);
-        }
       },
     });
   
