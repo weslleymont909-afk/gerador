@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useTransition } from 'react';
+import { useState, useRef, useTransition, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -56,11 +56,15 @@ export function PdfGeneratorForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       orderText: '',
-      orderDate: new Date(),
       paymentMethod: 'Pix / Cartão / Dinheiro',
       notes: 'Frete separado',
     },
   });
+
+  useEffect(() => {
+    // Set default date on the client to avoid hydration mismatch
+    form.setValue('orderDate', new Date());
+  }, [form]);
 
   const handleTextChange = (text: string) => {
     form.setValue('orderText', text);
