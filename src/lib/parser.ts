@@ -42,9 +42,12 @@ function parseProducts(text: string): ProductItem[] {
 }
 
 function parseCustomerInfo(text: string): CustomerInfo {
+    const deliverySectionMatch = text.match(/--- DADOS PARA ENTREGA ---\s*([\s\S]*)/);
+    const deliveryText = deliverySectionMatch ? deliverySectionMatch[1] : '';
+
     const getValue = (key: string) => {
-        const regex = new RegExp(`^${key}:(.*?)$`, 'im');
-        const match = text.match(regex);
+        const regex = new RegExp(`^${key}:\\s*(.*?)$`, 'im');
+        const match = deliveryText.match(regex);
         return match ? match[1].trim() : 'N/A';
     };
 
@@ -70,17 +73,15 @@ function parseSubtotal(text: string): number {
 
 export function parseOrderText(text: string): ParsedData {
   const productsSectionMatch = text.match(/--- RESUMO DO PEDIDO ---\s*([\s\S]*?)\s*(?=--- DADOS PARA ENTREGA ---|Subtotal:)/);
-  const deliverySectionMatch = text.match(/--- DADOS PARA ENTREGA ---\s*([\s\S]*)/);
   
   if (!productsSectionMatch) {
     throw new Error("Formato do texto inválido. Verifique se a seção 'RESUMO DO PEDIDO' existe.");
   }
   
   const productsText = productsSectionMatch[1] || '';
-  const deliveryText = deliverySectionMatch ? deliverySectionMatch[0] : '';
-
+  
   const products = parseProducts(productsText);
-  const customer = parseCustomerInfo(deliveryText);
+  const customer = parseCustomerInfo(text); // Pass the full text
   const subtotal = parseSubtotal(text);
 
   if (products.length === 0) {
