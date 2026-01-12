@@ -22,8 +22,13 @@ function parseProducts(text: string): ProductItem[] {
     const sizeMatch = desc.match(/\(Tamanho (\d+|0\d)\)/);
     const size = sizeMatch ? `Nº ${sizeMatch[1]}` : 'N/A';
     
-    const nameMatch = desc.match(/^(.*?)(?:\s\(Tamanho|\s\((Fêmea|Macho)\)|\s-)/);
-    const name = nameMatch ? nameMatch[1] : 'Produto Desconhecido';
+    const nameMatch = desc.match(/^(.*?)(?:\s\(Tamanho|\s\((Fêmea|Macho)\)|$)/);
+    let name = nameMatch ? nameMatch[1].trim() : 'Produto Desconhecido';
+    // Remove o " - " que pode ficar no final do nome do produto.
+    if (name.endsWith(' -')) {
+        name = name.slice(0, -2).trim();
+    }
+
 
     const genderMatch = desc.match(/\((Fêmea|Macho)\)/);
     const gender = genderMatch ? genderMatch[1] : undefined;
@@ -46,7 +51,7 @@ function parseCustomerInfo(text: string): CustomerInfo {
     const deliveryText = deliverySectionMatch ? deliverySectionMatch[1] : '';
 
     const getValue = (key: string) => {
-        const regex = new RegExp(`^${key}:\\s*(.*?)$`, 'im');
+        const regex = new RegExp(`${key}:\\s*(.+)`, 'i');
         const match = deliveryText.match(regex);
         return match ? match[1].trim() : 'N/A';
     };
@@ -61,6 +66,7 @@ function parseCustomerInfo(text: string): CustomerInfo {
         cep: getValue('CEP'),
     };
 }
+
 
 function parseSubtotal(text: string): number {
     const match = text.match(/Subtotal: R\$ ([\d,.]+)/);
@@ -81,7 +87,7 @@ export function parseOrderText(text: string): ParsedData {
   const productsText = productsSectionMatch[1] || '';
   
   const products = parseProducts(productsText);
-  const customer = parseCustomerInfo(text); // Pass the full text
+  const customer = parseCustomerInfo(text);
   const subtotal = parseSubtotal(text);
 
   if (products.length === 0) {
