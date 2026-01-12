@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useState, useEffect } from 'react';
+import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { DatePicker } from '@/components/ui/date-picker';
 import { parseOrderText } from '@/lib/parser';
-import { type ParsedData, type ProductItem } from '@/lib/types';
+import { type ProductItem } from '@/lib/types';
 
 
 const formSchema = z.object({
@@ -195,11 +195,6 @@ async function generatePdf(formData: {
 export function PdfGeneratorForm() {
   const { toast } = useToast();
   const [isGenerating, startGenerationTransition] = useTransition();
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -237,38 +232,6 @@ export function PdfGeneratorForm() {
       }
     });
   };
-
-  if (!isMounted) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Detalhes do Pedido</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div className="animate-pulse bg-muted h-8 w-1/3 rounded-md" />
-            <div className="animate-pulse bg-muted h-40 w-full rounded-md" />
-             <div className="grid md:grid-cols-2 gap-4">
-               <div>
-                  <div className="animate-pulse bg-muted h-8 w-1/4 rounded-md mb-2" />
-                  <div className="animate-pulse bg-muted h-10 w-full rounded-md" />
-               </div>
-                <div>
-                  <div className="animate-pulse bg-muted h-8 w-1/4 rounded-md mb-2" />
-                  <div className="animate-pulse bg-muted h-10 w-full rounded-md" />
-               </div>
-             </div>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-           <Button disabled>
-             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Gerar Pré-Orçamento em PDF
-            </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
 
   return (
     <Card className="w-full">
