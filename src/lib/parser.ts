@@ -22,7 +22,7 @@ function parseProducts(text: string): ProductItem[] {
     const sizeMatch = desc.match(/\(Tamanho (\d+|0\d)\)/);
     const size = sizeMatch ? `Nº ${sizeMatch[1]}` : 'N/A';
     
-    const nameMatch = desc.match(/^(.*?)(?:\s\(Tamanho|\s-)/);
+    const nameMatch = desc.match(/^(.*?)(?:\s\(Tamanho|\s\((Fêmea|Macho)\)|\s-)/);
     const name = nameMatch ? nameMatch[1] : 'Produto Desconhecido';
 
     const genderMatch = desc.match(/\((Fêmea|Macho)\)/);
@@ -59,7 +59,6 @@ function parseCustomerInfo(text: string): CustomerInfo {
     };
 }
 
-
 function parseSubtotal(text: string): number {
     const match = text.match(/Subtotal: R\$ ([\d,.]+)/);
     if (match) {
@@ -70,15 +69,15 @@ function parseSubtotal(text: string): number {
 
 
 export function parseOrderText(text: string): ParsedData {
-  const productsSectionMatch = text.match(/--- RESUMO DO PEDIDO ---\s*([\s\S]*?)\s*Subtotal:/);
+  const productsSectionMatch = text.match(/--- RESUMO DO PEDIDO ---\s*([\s\S]*?)\s*(?=--- DADOS PARA ENTREGA ---|Subtotal:)/);
   const deliverySectionMatch = text.match(/--- DADOS PARA ENTREGA ---\s*([\s\S]*)/);
   
   if (!productsSectionMatch) {
-    throw new Error("Formato do texto inválido. Verifique se a seção 'RESUMO DO PEDIDO' e o 'Subtotal' existem.");
+    throw new Error("Formato do texto inválido. Verifique se a seção 'RESUMO DO PEDIDO' existe.");
   }
   
   const productsText = productsSectionMatch[1] || '';
-  const deliveryText = deliverySectionMatch ? deliverySectionMatch[1] : '';
+  const deliveryText = deliverySectionMatch ? deliverySectionMatch[0] : '';
 
   const products = parseProducts(productsText);
   const customer = parseCustomerInfo(deliveryText);
