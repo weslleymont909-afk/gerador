@@ -53,28 +53,27 @@ function parseCustomerInfo(text: string): CustomerInfo {
         cep: 'N/A',
     };
 
-    let inDeliverySection = false;
+    const keyMap = {
+        'nome': 'name',
+        'cpf': 'cpf',
+        'telefone': 'phone',
+        'endereço': 'address',
+        'bairro': 'neighborhood',
+        'cidade/estado': 'cityState',
+        'cep': 'cep'
+    } as const;
 
     for (const line of lines) {
-        if (line.includes('--- DADOS PARA ENTREGA ---')) {
-            inDeliverySection = true;
-            continue;
-        }
+        const trimmedLine = line.trim();
+        const separatorIndex = trimmedLine.indexOf(':');
 
-        if (inDeliverySection || !text.includes('--- DADOS PARA ENTREGA ---')) {
-            const parts = line.split(':');
-            if (parts.length < 2) continue;
+        if (separatorIndex === -1) continue;
 
-            const key = parts[0].trim().toLowerCase();
-            const value = parts.slice(1).join(':').trim();
+        const key = trimmedLine.substring(0, separatorIndex).trim().toLowerCase() as keyof typeof keyMap;
+        const value = trimmedLine.substring(separatorIndex + 1).trim();
 
-            if (key === 'nome') customer.name = value;
-            else if (key === 'cpf') customer.cpf = value;
-            else if (key === 'telefone') customer.phone = value;
-            else if (key === 'endereço') customer.address = value;
-            else if (key === 'bairro') customer.neighborhood = value;
-            else if (key === 'cidade/estado') customer.cityState = value;
-            else if (key === 'cep') customer.cep = value;
+        if (key in keyMap) {
+            customer[keyMap[key]] = value;
         }
     }
 
@@ -83,7 +82,7 @@ function parseCustomerInfo(text: string): CustomerInfo {
 
 
 function parseSubtotal(text: string): number {
-    const match = text.match(/Subtotal: R\$ ([\d,.]+)/);
+    const match = text.match(/Subtotal:\s*R\$\s*([\d,.]+)/i);
     if (match) {
         return parseFloat(match[1].replace('.', '').replace(',', '.'));
     }
