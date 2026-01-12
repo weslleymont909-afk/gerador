@@ -56,21 +56,23 @@ function parseCustomerInfo(text: string): CustomerInfo {
     };
 
     lines.forEach(line => {
-        const trimmedLine = line.trim();
-        if (trimmedLine.toLowerCase().startsWith('nome:')) {
-            customer.name = trimmedLine.substring(5).trim();
-        } else if (trimmedLine.toLowerCase().startsWith('telefone:')) {
-            customer.phone = trimmedLine.substring(9).trim();
-        } else if (trimmedLine.toLowerCase().startsWith('endereço:')) {
-            customer.address = trimmedLine.substring(9).trim();
-        } else if (trimmedLine.toLowerCase().startsWith('cpf:')) {
-            customer.cpf = trimmedLine.substring(4).trim();
-        } else if (trimmedLine.toLowerCase().startsWith('bairro:')) {
-            customer.neighborhood = trimmedLine.substring(7).trim();
-        } else if (trimmedLine.toLowerCase().startsWith('cidade/estado:')) {
-            customer.cityState = trimmedLine.substring(14).trim();
-        } else if (trimmedLine.toLowerCase().startsWith('cep:')) {
-            customer.cep = trimmedLine.substring(4).trim();
+        // Remove asterisks and trim whitespace
+        const cleanLine = line.replace(/\*/g, '').trim();
+
+        if (cleanLine.toLowerCase().startsWith('nome:')) {
+            customer.name = cleanLine.substring(5).trim();
+        } else if (cleanLine.toLowerCase().startsWith('telefone:')) {
+            customer.phone = cleanLine.substring(9).trim();
+        } else if (cleanLine.toLowerCase().startsWith('endereço:')) {
+            customer.address = cleanLine.substring(9).trim();
+        } else if (cleanLine.toLowerCase().startsWith('cpf:')) {
+            customer.cpf = cleanLine.substring(4).trim();
+        } else if (cleanLine.toLowerCase().startsWith('bairro:')) {
+            customer.neighborhood = cleanLine.substring(7).trim();
+        } else if (cleanLine.toLowerCase().startsWith('cidade/estado:')) {
+            customer.cityState = cleanLine.substring(14).trim();
+        } else if (cleanLine.toLowerCase().startsWith('cep:')) {
+            customer.cep = cleanLine.substring(4).trim();
         }
     });
 
@@ -79,7 +81,7 @@ function parseCustomerInfo(text: string): CustomerInfo {
 
 
 function parseSubtotal(text: string): number {
-    const match = text.match(/Subtotal:\s*R\$\s*([\d,.]+)/i);
+    const match = text.match(/Subtotal:.*R\$\s*([\d,.]+)/i);
     if (match) {
         return parseFloat(match[1].replace('.', '').replace(',', '.'));
     }
