@@ -4,6 +4,7 @@ function parseProducts(text: string): ProductItem[] {
   const productLines = text.match(/- \d+x (.*)/g) || [];
   
   return productLines.map(line => {
+    // This regex handles both normal spaces and non-breaking spaces (\s) before R$
     const match = line.match(/- (?<quantity>\d+)x (?<desc>.*?)\s+-\s+R\$\s+(?<price>[\d,.]+)/);
     if (!match || !match.groups) {
       console.error(`Could not parse product line: ${line}`);
@@ -22,13 +23,9 @@ function parseProducts(text: string): ProductItem[] {
     const sizeMatch = desc.match(/\(Tamanho (\d+|0\d)\)/);
     const size = sizeMatch ? `Nº ${sizeMatch[1]}` : 'N/A';
     
-    const nameMatch = desc.match(/^(.*?)(?:\s\(Tamanho|\s\((Fêmea|Macho)\)|$)/);
+    // This regex stops before size or gender to get only the product name
+    const nameMatch = desc.match(/^(.*?)(?:\s\(Tamanho|\s\((?:Fêmea|Macho)\)|$)/);
     let name = nameMatch ? nameMatch[1].trim() : 'Produto Desconhecido';
-    // Remove o " - " que pode ficar no final do nome do produto.
-    if (name.endsWith(' -')) {
-        name = name.slice(0, -2).trim();
-    }
-
 
     const genderMatch = desc.match(/\((Fêmea|Macho)\)/);
     const gender = genderMatch ? genderMatch[1] : undefined;
@@ -48,22 +45,22 @@ function parseProducts(text: string): ProductItem[] {
 
 function parseCustomerInfo(text: string): CustomerInfo {
     const deliverySectionMatch = text.match(/--- DADOS PARA ENTREGA ---\s*([\s\S]*)/);
-    const deliveryText = deliverySectionMatch ? deliverySectionMatch[1] : '';
+    const deliveryText = deliverySectionMatch ? deliverySectionMatch[1].trim() : '';
 
-    const getValue = (key: string) => {
+    const getValue = (key: string, data: string) => {
         const regex = new RegExp(`${key}:\\s*(.+)`, 'i');
-        const match = deliveryText.match(regex);
+        const match = data.match(regex);
         return match ? match[1].trim() : 'N/A';
     };
 
     return {
-        name: getValue('Nome'),
-        cpf: getValue('CPF'),
-        phone: getValue('Telefone'),
-        address: getValue('Endereço'),
-        neighborhood: getValue('Bairro'),
-        cityState: getValue('Cidade/Estado'),
-        cep: getValue('CEP'),
+        name: getValue('Nome', deliveryText),
+        cpf: getValue('CPF', deliveryText),
+        phone: getValue('Telefone', deliveryText),
+        address: getValue('Endereço', deliveryText),
+        neighborhood: getValue('Bairro', deliveryText),
+        cityState: getValue('Cidade/Estado', deliveryText),
+        cep: getValue('CEP', deliveryText),
     };
 }
 
@@ -78,7 +75,7 @@ function parseSubtotal(text: string): number {
 
 
 export function parseOrderText(text: string): ParsedData {
-  const productsSectionMatch = text.match(/--- RESUMO DO PEDIDO ---\s*([\s\S]*?)\s*(?=--- DADOS PARA ENTREGA ---|Subtotal:)/);
+  const productsSectionMatch = text.match(/--- RESUMO DO PEDIDO ---\s*([\s\S]*?)(?=--- DADOS PARA ENTREGA ---|Subtotal:)/);
   
   if (!productsSectionMatch) {
     throw new Error("Formato do texto inválido. Verifique se a seção 'RESUMO DO PEDIDO' existe.");
