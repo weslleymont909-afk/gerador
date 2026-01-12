@@ -42,24 +42,43 @@ function parseProducts(text: string): ProductItem[] {
 }
 
 function parseCustomerInfo(text: string): CustomerInfo {
-    const getValue = (key: string, data: string) => {
-        const regex = new RegExp(`${key}:\\s*(.+)`, 'i');
-        const match = data.match(regex);
-        return match ? match[1].trim() : 'N/A';
+    const lines = text.split('\n');
+    const customer: CustomerInfo = {
+        name: 'N/A',
+        cpf: 'N/A',
+        phone: 'N/A',
+        address: 'N/A',
+        neighborhood: 'N/A',
+        cityState: 'N/A',
+        cep: 'N/A',
     };
 
-    const deliverySectionMatch = text.match(/--- DADOS PARA ENTREGA ---\s*([\s\S]*)/);
-    const deliveryText = deliverySectionMatch ? deliverySectionMatch[1] : text;
+    let inDeliverySection = false;
 
-    return {
-        name: getValue('Nome', deliveryText),
-        cpf: getValue('CPF', deliveryText),
-        phone: getValue('Telefone', deliveryText),
-        address: getValue('Endereço', deliveryText),
-        neighborhood: getValue('Bairro', deliveryText),
-        cityState: getValue('Cidade/Estado', deliveryText),
-        cep: getValue('CEP', deliveryText),
-    };
+    for (const line of lines) {
+        if (line.includes('--- DADOS PARA ENTREGA ---')) {
+            inDeliverySection = true;
+            continue;
+        }
+
+        if (inDeliverySection || !text.includes('--- DADOS PARA ENTREGA ---')) {
+            const parts = line.split(':');
+            if (parts.length < 2) continue;
+
+            const key = parts[0].trim().toLowerCase();
+            const value = parts.slice(1).join(':').trim();
+
+            if (key === 'nome') customer.name = value;
+            else if (key === 'cpf') customer.cpf = value;
+            else if (key === 'telefone') customer.phone = value;
+            else if (key === 'endereço') customer.address = value;
+            else if (key === 'bairro') customer.neighborhood = value;
+            else if (key === 'cidade/estado') customer.cityState = value;
+            else if (key === 'cep') customer.cep = value;
+        }
+    }
+
+    return customer;
 }
 
 
@@ -73,19 +92,11 @@ function parseSubtotal(text: string): number {
 
 
 export function parseOrderText(text: string): ParsedData {
-  const productsSectionMatch = text.match(/--- RESUMO DO PEDIDO ---\s*([\s\S]*?)(?=--- DADOS PARA ENTREGA ---|Subtotal:)/);
-  
-  if (!productsSectionMatch) {
-    throw new Error("Formato do texto inválido. Verifique se a seção 'RESUMO DO PEDIDO' existe.");
-  }
-  
-  const productsText = productsSectionMatch[1] || '';
-  
-  const products = parseProducts(productsText);
+  const products = parseProducts(text);
   const customer = parseCustomerInfo(text);
   const subtotal = parseSubtotal(text);
 
-  if (products.length === 0) {
+  if (products.length === 0 && text.includes('--- RESUMO DO PEDIDO ---')) {
     console.warn("Nenhum produto foi encontrado no texto do pedido. Verifique o formato.");
   }
 
