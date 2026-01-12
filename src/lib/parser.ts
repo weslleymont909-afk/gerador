@@ -4,6 +4,7 @@ function parseProducts(text: string): ProductItem[] {
   const productLines = text.match(/- \d+x (.*)/g) || [];
   
   return productLines.map(line => {
+    // Regex that accepts any whitespace character before R$
     const match = line.match(/- (?<quantity>\d+)x (?<desc>.*?)\s+-\s+R\$\s+(?<price>[\d,.]+)/);
     if (!match || !match.groups) {
       console.error(`Could not parse product line: ${line}`);
@@ -22,6 +23,7 @@ function parseProducts(text: string): ProductItem[] {
     const sizeMatch = desc.match(/\(Tamanho (\d+|0\d)\)/);
     const size = sizeMatch ? `Nº ${sizeMatch[1]}` : 'N/A';
     
+    // Stop before size or gender
     const nameMatch = desc.match(/^(.*?)(?:\s\(Tamanho|\s\((?:Fêmea|Macho)\)|$)/);
     let name = nameMatch ? nameMatch[1].trim() : 'Produto Desconhecido';
 
@@ -53,29 +55,24 @@ function parseCustomerInfo(text: string): CustomerInfo {
         cep: 'N/A',
     };
 
-    const keyMap = {
-        'nome': 'name',
-        'cpf': 'cpf',
-        'telefone': 'phone',
-        'endereço': 'address',
-        'bairro': 'neighborhood',
-        'cidade/estado': 'cityState',
-        'cep': 'cep'
-    } as const;
-
-    for (const line of lines) {
+    lines.forEach(line => {
         const trimmedLine = line.trim();
-        const separatorIndex = trimmedLine.indexOf(':');
-
-        if (separatorIndex === -1) continue;
-
-        const key = trimmedLine.substring(0, separatorIndex).trim().toLowerCase() as keyof typeof keyMap;
-        const value = trimmedLine.substring(separatorIndex + 1).trim();
-
-        if (key in keyMap) {
-            customer[keyMap[key]] = value;
+        if (trimmedLine.toLowerCase().startsWith('nome:')) {
+            customer.name = trimmedLine.substring(5).trim();
+        } else if (trimmedLine.toLowerCase().startsWith('telefone:')) {
+            customer.phone = trimmedLine.substring(9).trim();
+        } else if (trimmedLine.toLowerCase().startsWith('endereço:')) {
+            customer.address = trimmedLine.substring(9).trim();
+        } else if (trimmedLine.toLowerCase().startsWith('cpf:')) {
+            customer.cpf = trimmedLine.substring(4).trim();
+        } else if (trimmedLine.toLowerCase().startsWith('bairro:')) {
+            customer.neighborhood = trimmedLine.substring(7).trim();
+        } else if (trimmedLine.toLowerCase().startsWith('cidade/estado:')) {
+            customer.cityState = trimmedLine.substring(14).trim();
+        } else if (trimmedLine.toLowerCase().startsWith('cep:')) {
+            customer.cep = trimmedLine.substring(4).trim();
         }
-    }
+    });
 
     return customer;
 }
